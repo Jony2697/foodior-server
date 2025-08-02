@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const app = express()
-const port =process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
@@ -27,20 +27,41 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const foodsCollection=client.db("foodDB").collection("foods");
+    const foodsCollection = client.db("foodDB").collection("foods");
 
     // foods api
-    app.get('/foods',async(req,res)=>{
-      const result=await foodsCollection.find().toArray();
+    app.get('/availableFoods', async (req, res) => {
+      const result = await foodsCollection
+        .find({ status: 'available' })
+        .toArray();
       res.send(result);
     })
 
-    app.get('/foodsDetails/:id',async(req,res)=>{
-      const id=req.params.id;
-      const query={_id:new ObjectId(id)};
-      const result=await foodsCollection.findOne(query);
+    app.get('/foodsDetails/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodsCollection.findOne(query);
       res.send(result);
     })
+
+    //featured foods according quantity 
+    app.get('/featuredFoods', async (req, res) => {
+      const featured = await foodsCollection
+        .find({ status: 'available' })
+        .sort({ quantity: -1 })
+        .limit(6)
+        .toArray();
+      res.send(featured);
+    })
+
+    app.post('/addFoods',async(req,res)=>{
+      const newFood=req.body;
+      console.log(newFood);
+      const result=await foodsCollection.insertOne(newFood);
+      res.send(result)
+      
+    })
+
 
 
     // Send a ping to confirm a successful connection
