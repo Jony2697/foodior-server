@@ -30,6 +30,11 @@ async function run() {
     const foodsCollection = client.db("foodDB").collection("foods");
 
     // foods api
+    app.get('/foods',async(req,res)=>{
+      const result=await foodsCollection.find().toArray();
+      res.send(result)
+    })
+
     app.get('/availableFoods', async (req, res) => {
       const result = await foodsCollection
         .find({ status: 'available' })
@@ -60,6 +65,13 @@ async function run() {
       const result=await foodsCollection.insertOne(newFood);
       res.send(result)
       
+    })
+
+    app.delete('/foods/:id',async(req,res)=>{
+      const id=req.params.id;
+      const query={_id:new ObjectId (id)};
+      const result=await foodsCollection.deleteOne(query);
+      res.send(result);
     })
 
 
