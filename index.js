@@ -28,6 +28,8 @@ async function run() {
     await client.connect();
 
     const foodsCollection = client.db("foodDB").collection("foods");
+    const requestsCollection = client.db("foodDB").collection("foodRequests");
+    const usersCollection = client.db("foodDB").collection("users");
 
     // foods api
     app.get('/foods',async(req,res)=>{
@@ -85,6 +87,44 @@ async function run() {
       const query={_id:new ObjectId (id)};
       const result=await foodsCollection.deleteOne(query);
       res.send(result);
+    })
+
+    // request foods api 
+    app.post('/foodRequests',async(req,res)=>{
+      const requestData=req.body;
+      console.log(requestData);
+      
+      const result=await requestsCollection.insertOne(requestData);
+      res.send(result);
+
+    })
+    app.get('/foodRequests',async(req,res)=>{
+      const result=await requestsCollection.find().toArray();
+      res.send(result);
+    })
+
+
+    app.patch('/foods/:id',async(req,res)=>{
+      const id=req.params.id;
+      const {status}=req.body;
+      const filter={_id:new ObjectId(id)};
+      const updatedDoc={
+        $set:{status:status},
+      };
+      const result=await foodsCollection.updateOne(filter,updatedDoc);
+      res.send(result);
+    })
+
+    // Users related Api
+    app.get('/users',async(req,res)=>{
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    })
+    app.post('/users',async(req,res)=>{
+      const userInfo=req.body;
+      console.log(userInfo);
+      const result=await usersCollection.insertOne(userInfo);
+      res.send(result);      
     })
 
 
